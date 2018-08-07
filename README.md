@@ -23,5 +23,5 @@ Spring boot and MySql Example
 
 1- Open RecipesApplication.java file from your IDE then right click and choose "Run File"
 
-2- open cmd and go to project directry for example (cd /directory) then execute this command "mvn spring-boot :run"
+2- open cmd and go to project directry for example (cd /directory) then execute this command "mvn spring-boot:run"
 
