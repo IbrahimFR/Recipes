@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <!-- Basic meta info
+        ==================== -->
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Favorite Recipes</title>
+        <!-- CSS files
+               ============== -->
+        <link rel="stylesheet" type="text/css" href="css/reset.css" />
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css"  />
+        <link rel="stylesheet" type="text/css" href="css/animate.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/styles.css" />
+
+        <!-- Modernizr file
+        =================== -->
+        <script charset="utf-8" type="text/javascript "src="js/modernizr.custom.js"></script>
+        <!-- JavaScript files
+          ===================== -->
+        <script charset="utf-8" src="js/jquery-3.3.1.min.js"></script>
+        <script charset="utf-8" src="js/bootstrap.min.js"></script>
+        <script charset="utf-8" src="js/wow.min.js"></script>
+        <script charset="utf-8" src="js/scripts.js"></script>
+
+    </head>
+
+    <body>
+
+        <!-- Splash Screen
+        ================== -->
+        <div id="splash"></div>
+
+        <!-- Website Logo
+        ================= -->
+        <section id="logo">
+            <div class="container text-center wow pulse">
+                <img src="images/logo-white.svg" alt="logo" />
+                <br />
+                <h1>Favorite Recipes</h1>
+            </div>
+        </section>
+
+        <!-- Recipe Section
+        =================== -->
+        <section id="recipe">
+            <div class="container">
+
+                <!-- Recipes -->
+                <div class="row wow slideInUp">
+
+
+                    <div class="col-12">
+                        <div class="recipe-directions">
+                          
+                                <input id="search-txt" type="text" class="textbox"   placeholder="Search Recipes...">
+                                <input onclick="searchRecipes()"title="Search" value="" type="submit" class="button">
+                         
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="recipe-directions">
+                            <ol class="recipe-list">
+                                <li th:each="recipe : ${recipes}">
+                                    <span th:id="${recipe.id}" th:text="${recipe.dishName}" style="display:inline-block;width:100%;cursor: pointer;" onclick="getRecipeData(this.id)"></span>
+                                </li>
+                            </ol>
+                            <h3 id="no-result"> No Search Results Found</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="recipe-data" class="row vertical-align">
+                    <div class="col-12">
+                        <!-- Picture -->
+                        <div class="col-md-8 pull-left wow swing">
+                            <img  id="img-dish"  alt="bbq-pork-ribs" class="recipe-picture" />
+                        </div>
+
+                        <!-- Info -->
+                        <div class="col-md-4 pull-right wow lightSpeedIn">
+                            <div class="recipe-info">
+                                <h3>Info</h3>
+                                <!-- Creation Date -->
+                                <div class="row">
+                                    <div class="col-2 text-center">
+                                        <i class="fa fa-clock-o" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-4">Creation Date</div>
+                                    <div id="creation-date" class="col-6"></div>
+                                </div>
+                                <!-- Vegetarian -->
+                                <div class="row">
+                                    <div class="col-2 text-center">
+                                        <i class="fa fa-tree" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-4">Vegetarian</div>
+                                    <div id="vegetarian" class="col-6"></div>
+                                </div>
+                                <!-- People Number-->
+                                <div class="row">
+                                    <div class="col-2 text-center">
+                                        <i class="fa fa-users" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-4">People Number</div>
+                                    <div id="peopleNumber" class="col-6"></div>
+                                </div>
+                                <!-- Ingredients-->
+                                <div class="row">
+                                    <div class="col-2 text-center">
+                                        <i class="fa fa-info" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-4">Ingredients</div>
+                                    <div id="ingredients" class="col-6"></div>
+                                </div>
+                                <!-- Instructions-->
+                                <div class="row">
+                                    <div class="col-2 text-center">
+                                        <i class="fa fa-info" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col-4">Instructions</div>
+                                    <div id="instructions" class="col-6"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </section>
+
+
+
+        <script th:inline="javascript">
+            function getRecipeData(recipeId) {
+                $('#img-dish').attr('src', '/getDishImage/' + recipeId);
+                $.ajax({
+                    url: '/getRecipeData/' + recipeId,
+                    method: 'GET',
+                    type: 'json',
+                    success: function (result) {
+                        
+                        $("#creation-date").text(result.creationDate);
+                        if(result.vegetarian===true)
+                        $("#vegetarian").text("Yes");
+                        else
+                        $("#vegetarian").text("No");
+                        $("#peopleNumber").text(result.peopleNumber);
+                        $("#ingredients").text(result.ingredients);
+                        $("#instructions").text(result.instructions);
+                    }
+                });
+                $("#recipe-data").show();
+            }
+           function searchRecipes(){
+               
+               var searchKey=$("#search-txt").val();
+               //remove old data    
+               $("li:has(span)").remove();     
+               var clist =$('ol.recipe-list');
+               //convert recipes in thymeleaf to JS variable
+               var recipeList =/*[[${recipes}]]*/ 'default';
+           
+               $.each(recipeList,function(i)
+               {
+               // check searchKey inside list
+               if(recipeList[i].dishName.indexOf(searchKey) > -1){  
+                var li = $('<li/>')
+                        .appendTo(clist);
+                
+                        $('<span/>')
+                        .attr("id",recipeList[i].id)   
+                        .text(recipeList[i].dishName)
+                        .css({"display":"inline-block","width":"100%","cursor": "pointer"})
+                        .click(function (){getRecipeData(recipeList[i].id);})
+                        .appendTo(li);
+            }
+               });
+               if($('li').length===0){
+                   $("#no-result").show();
+               }else{
+                   $("#no-result").hide();
+               }
+               //hide recipe data
+              if(searchKey!==''){
+              $("#recipe-data").hide();
+          }
+       }
+        </script>
+    </body>
+
+</html>
